@@ -1,31 +1,28 @@
 ---
-title: "ToothGrowth"
+title: "Statistical Inference Project - ToothGrowth"
 author: "Diego Gaona"
 date: "19 de agosto de 2015"
 output: html_document
 ---
 ```{r load, echo = F, results='hide', message=FALSE, warning=FALSE}
 require("knitr")
-opts_chunk$set(echo = T, cache = TRUE, fig.width=9, fig.height=4.8)
+opts_chunk$set(echo = T, cache = TRUE, fig.width=13, fig.height=4)
 knitr::opts_chunk$set(tidy=FALSE, fig.path='figures/')
 require("ggplot2")
-require("gridExtra")
 ```
+The objective is to explore and analyze the ToothGrowth data and compare tooth growth by supp and dose.  
+The data shows the Effect of Vitamin C on Tooth Growth in Guinea Pigs.
+The response is the length of odontoblasts (cells responsible for tooth growth) in 60 guinea pigs. Each animal received one of three dose levels of vitamin C (0.5, 1, and 2 mg/day) by one of two delivery methods, Orange Juice (coded as OJ) or ascorbic acid (a form of Vitamin C and coded as VC)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
+**Loading the data**  
+The ToothGrowth is part of the R datasets package, and now I load the data in the "datat" data frame.
 ```{r}
 datat <- ToothGrowth
 ```
 
-```{r}
-str(datat)
-```
-
-
-```{r}
+**Exploring the data**  
+Now I explore the data with 2 plots (the code to the plots are in Appendix section (and the transformations in the data for the plot 2). In this boxplot we see the differences bettween the dosages by the supplement type. We can see big differences between the dosage amount, when the dosage is bigger, the tooth is longer . Between the supplement types, we can see when the dosage is 2 mg/day, the OJ and VC are not so different, but in the other 2 dosages, the differences are clear (the data  of dosage 0.5 and 1 mg/day of OJ shows tooths longer than with VC) .  
+```{r echo=FALSE}
 box1 <- ggplot(datat, aes(x = factor(dose), y = len, fill = factor(dose))) +
       geom_boxplot() + 
       facet_grid(.~supp) + 
@@ -35,45 +32,83 @@ box1 <- ggplot(datat, aes(x = factor(dose), y = len, fill = factor(dose))) +
 box1
 ```
 
-
-```{r}
-datat$index <- as.numeric(paste(c(01:10,21:30,41:50,11:20,31:40,51:60)))
-datat$index <- sprintf("%02d",datat$index) ## Add 0 before number 1:10 to do a correct order
-datat <- datat[order(datat$index),]
-datat$index <- as.numeric(paste(c(01:10,01:10,01:10,01:10,01:10,01:10))) ## Change the index, only to get a better view to Graphic
-p1 <- ggplot(datat, aes(x = index, y = len, colour = supp)) + ## Initializes ggplot object) 
+In the plot bellow, we can see the data points by supplement type (by color) and dosage (by facet).
+I created a index in the data to get a more clearly view of the data points. This plots confirm the assumptions of the plot above, and now we can see the difference between each data point.
+```{r echo=FALSE}
+datap2 <- datat
+datap2$index <- as.numeric(paste(c(01:10,21:30,41:50,11:20,31:40,51:60))) ## Created to get a better view in the plot
+datap2$index <- sprintf("%02d",datap2$index) ## Add 0 before number 1:10 to do a correct order
+datap2 <- datap2[order(datap2$index),]
+datap2$index <- as.numeric(paste(c(01:10,01:10,01:10,01:10,01:10,01:10))) ## Change the index, only to get a better view to Graphic
+p2 <- ggplot(datap2, aes(x = index, y = len, colour = supp)) + ## Initializes ggplot object) 
       geom_point(stat = "identity", size = 4, alpha = .7) +
       geom_line(stat = "identity") +
       facet_grid(.~dose) +
-      ylab("Lenght") +  xlab("Index (created only for a better view)") +
+      ylab("Lenght") +  xlab("Index") +
       ggtitle(expression(bold("Lenght by dose (each facet is a dosage)"))) +
       scale_colour_discrete(name="Supplement Type", labels=c("OJ - Orange Juice", "VC - Vitamin C"))
-p1
+p2
 ```
 
+**Basic summary of the data**  
+Now we see a basic numeric summary of the data:  
 ```{r}
 summary(datat)
 ```
-
+**Performing hypothesis tests**  
+I do the hypotheis tests by supplement type and after by supplement type and dosage. The t.test comparing the ToothGrowth data by supplement (all dosages):
 ```{r}
-data05 <- datat[1:20,1:3] ## subset the data with dose = 0.5
-data1 <- datat[21:40,1:3] ## subset the data with dose = 1
-data2 <- datat[41:60,1:3] ## subset the data with dose = 2
+t.test(len~supp, data = datat)
 ```
 
+To do the other t.tests I subset the data by dosage (using datap2, the data used to do the plot2, only to make the subset more simple)
 ```{r}
-t.test(len~supp, data=data1)
+data05 <- datap2[1:20,1:3] ## subset the data with dose = 0.5
+data1 <- datap2[21:40,1:3] ## subset the data with dose = 1
+data2 <- datap2[41:60,1:3] ## subset the data with dose = 2
+```
+
+The t.test between supplements for 0.5mg/day
+```{r}
+t.test(len~supp, data = data05)
+```
+
+The t.test between supplements for 1mg/day
+```{r}
+t.test(len~supp, data = data1)
+```
+
+The t.test between supplements for 2mg/day
+```{r}
+t.test(len~supp, data = data2)
 ```
 
 
-```{r}
-t.test(len~supp, data=data2)
+##Appendix  
+The code for the boxplot:  
+```{r eval=FALSE}
+box1 <- ggplot(datat, aes(x = factor(dose), y = len, fill = factor(dose))) +
+      geom_boxplot() + 
+      facet_grid(.~supp) + 
+      ggtitle(expression(bold("Boxplots of ToothGrowth data"))) +
+      ylab("Lenght") +  xlab("Dosage") + 
+      scale_fill_discrete(name="Dosage")
+box1
 ```
 
-```{r}
-t.test(len~supp, data=data2)
+The code for the plot2  
+```{r eval=FALSE}
+datap2 <- datat
+datap2$index <- as.numeric(paste(c(01:10,21:30,41:50,11:20,31:40,51:60))) ## Created to get a better view in the plot
+datap2$index <- sprintf("%02d",datap2$index) ## Add 0 before number 1:10 to do a correct order
+datap2 <- datap2[order(datap2$index),]
+datap2$index <- as.numeric(paste(c(01:10,01:10,01:10,01:10,01:10,01:10))) ## Change the index, only to get a better view to Graphic
+p2 <- ggplot(datap2, aes(x = index, y = len, colour = supp)) + ## Initializes ggplot object) 
+      geom_point(stat = "identity", size = 4, alpha = .7) +
+      geom_line(stat = "identity") +
+      facet_grid(.~dose) +
+      ylab("Lenght") +  xlab("Index") +
+      ggtitle(expression(bold("Lenght by dose (each facet is a dosage)"))) +
+      scale_colour_discrete(name="Supplement Type", labels=c("OJ - Orange Juice", "VC - Vitamin C"))
+p2
 ```
-
-
-
-
