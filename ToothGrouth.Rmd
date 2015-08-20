@@ -1,0 +1,79 @@
+---
+title: "ToothGrowth"
+author: "Diego Gaona"
+date: "19 de agosto de 2015"
+output: html_document
+---
+```{r load, echo = F, results='hide', message=FALSE, warning=FALSE}
+require("knitr")
+opts_chunk$set(echo = T, cache = TRUE, fig.width=9, fig.height=4.8)
+knitr::opts_chunk$set(tidy=FALSE, fig.path='figures/')
+require("ggplot2")
+require("gridExtra")
+```
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+datat <- ToothGrowth
+```
+
+```{r}
+str(datat)
+```
+
+
+```{r}
+box1 <- ggplot(datat, aes(x = factor(dose), y = len, fill = factor(dose))) +
+      geom_boxplot() + 
+      facet_grid(.~supp) + 
+      ggtitle(expression(bold("Boxplots of ToothGrowth data"))) +
+      ylab("Lenght") +  xlab("Dosage") + 
+      scale_fill_discrete(name="Dosage")
+box1
+```
+
+
+```{r}
+datat$index <- as.numeric(paste(c(01:10,21:30,41:50,11:20,31:40,51:60)))
+datat$index <- sprintf("%02d",datat$index) ## Add 0 before number 1:10 to do a correct order
+datat <- datat[order(datat$index),]
+datat$index <- as.numeric(paste(c(01:10,01:10,01:10,01:10,01:10,01:10))) ## Change the index, only to get a better view to Graphic
+p1 <- ggplot(datat, aes(x = index, y = len, colour = supp)) + ## Initializes ggplot object) 
+      geom_point(stat = "identity", size = 4, alpha = .7) +
+      geom_line(stat = "identity") +
+      facet_grid(.~dose) +
+      ylab("Lenght") +  xlab("Index (created only for a better view)") +
+      ggtitle(expression(bold("Lenght by dose (each facet is a dosage)"))) +
+      scale_colour_discrete(name="Supplement Type", labels=c("OJ - Orange Juice", "VC - Vitamin C"))
+p1
+```
+
+```{r}
+summary(datat)
+```
+
+```{r}
+data05 <- datat[1:20,1:3] ## subset the data with dose = 0.5
+data1 <- datat[21:40,1:3] ## subset the data with dose = 1
+data2 <- datat[41:60,1:3] ## subset the data with dose = 2
+```
+
+```{r}
+with(data05, t.test(len[supp == "OJ"], len[supp == "VC"]))
+```
+
+
+```{r}
+with(data1, t.test(len[supp == "OJ"], len[supp == "VC"]))
+```
+
+```{r}
+with(data2, t.test(len[supp == "OJ"], len[supp == "VC"]))
+```
+
+
+
+
