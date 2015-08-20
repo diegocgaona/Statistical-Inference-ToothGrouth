@@ -62,16 +62,16 @@ data2 <- datat[41:60,1:3] ## subset the data with dose = 2
 ```
 
 ```{r}
-with(data05, t.test(len[supp == "OJ"], len[supp == "VC"]))
+t.test(len~supp, data=data1)
 ```
 
 
 ```{r}
-with(data1, t.test(len[supp == "OJ"], len[supp == "VC"]))
+t.test(len~supp, data=data2)
 ```
 
 ```{r}
-with(data2, t.test(len[supp == "OJ"], len[supp == "VC"]))
+t.test(len~supp, data=data2)
 ```
 
 
